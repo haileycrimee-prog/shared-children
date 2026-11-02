@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="《共享儿女》是一次关于信任、服务边界和稳定陪伴的沉浸式新闻体验。"
+    />
+    <meta name="theme-color" content="#f6ebdd" />
+    <title>共享儿女｜一次关于信任的服务体验</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="ambient ambient--one" aria-hidden="true"></div>
+    <div class="ambient ambient--two" aria-hidden="true"></div>
+
+    <div class="app-shell">
+      <header class="topbar" id="game-header" hidden>
+        <a class="brand" href="./" aria-label="返回《共享儿女》开场">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>共享儿女</span>
+        </a>
+        <div class="progress-wrap">
+          <span class="progress-label" id="progress-label">1/5</span>
+          <div
+            class="progress-track"
+            id="progress-track"
+            role="progressbar"
+            aria-label="体验进度"
+            aria-valuemin="1"
+            aria-valuemax="5"
+            aria-valuenow="1"
+          >
+            <span class="progress-fill" id="progress-fill"></span>
+          </div>
+        </div>
+      </header>
+
+      <main id="game-root" class="game-root" tabindex="-1"></main>
+      <p id="scene-live" class="sr-only" aria-live="polite" aria-atomic="true"></p>
+    </div>
+
+    <noscript>
+      <div class="noscript">
+        这个互动体验需要启用 JavaScript。请启用后重新打开页面。
+      </div>
+    </noscript>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
