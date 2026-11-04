@@ -1170,18 +1170,28 @@ const SCENE_PROGRESS = {
   visitFailedPlatform: 1,
   visitFailedCare: 1,
   trustDay3: 2,
+  trustDay3Duck: 2,
+  trustDay3Dish: 2,
+  trustDay3Travel: 2,
   trustDay7: 2,
+  trustDay7Gaming: 2,
+  trustDay7Cats: 2,
+  trustDay7Tea: 2,
   trustDay12: 2,
+  trustDay12Accepted: 2,
   gift: 3,
   giftAccepted: 3,
   giftRejected: 3,
   giftConsulted: 3,
+  boundaryDirect: 3,
   replacementAccepted: 4,
   replacementRejected: 4,
   replacementConsulted: 4,
+  replacementBoundary: 4,
   endingAccepted: 5,
   endingRejected: 5,
   endingConsulted: 5,
+  endingBoundary: 5,
 };
 
 const SCENE_ANNOUNCEMENTS = {
@@ -1190,18 +1200,28 @@ const SCENE_ANNOUNCEMENTS = {
   visitFailedPlatform: "王奶奶不熟悉平台服务人员，服务未能开始。",
   visitFailedCare: "王奶奶拒绝接受照顾，服务未能开始。",
   trustDay3: "第三次服务。王奶奶开始记住你的细心。",
-  trustDay7: "第七次服务。王奶奶想送你一些老家茶叶。",
-  trustDay12: "第十二次服务。王奶奶已经高度信任你。",
+  trustDay3Duck: "你给王奶奶带了酱鸭，她记住了你的细心。",
+  trustDay3Dish: "你买了王奶奶爱吃的菜，她记住了你的细心。",
+  trustDay3Travel: "你网购了王奶奶旅游时尝过的美食，她记住了你的细心。",
+  trustDay7: "第七次服务。王奶奶想知道你喜欢什么。",
+  trustDay7Gaming: "你告诉王奶奶自己喜欢打游戏，她试着理解年轻人的喜好。",
+  trustDay7Cats: "你告诉王奶奶自己喜欢小猫，她试着理解年轻人的喜好。",
+  trustDay7Tea: "你告诉王奶奶自己喜欢喝茶，她说要送一些老家茶叶。",
+  trustDay12: "第十二次服务。王奶奶问能不能在有事时直接给你打电话。",
+  trustDay12Accepted: "你答应王奶奶可以随时打电话，她把你当成自己的孩子。",
   gift: "服务结束后，王奶奶拿出一袋茶叶，请你收下。",
   giftAccepted: "你接受了茶叶。家属信任下降，服务被终止。",
   giftRejected: "你拒绝了茶叶。服务边界得到保持，王奶奶有些失落。",
   giftConsulted: "你询问了家属。沟通后，服务继续。",
+  boundaryDirect: "你请王奶奶有事联系女儿，王女士明确了服务时间之外的边界。",
   replacementAccepted: "服务人员由小陈更换为小李。王奶奶需要重新建立信任。",
   replacementRejected: "平台调整服务人员。王奶奶需要和新服务人员小李重新建立信任。",
   replacementConsulted: "平台调整服务人员。王奶奶需要和新服务人员小李重新建立信任。",
+  replacementBoundary: "平台调整服务人员。王奶奶需要和新服务人员小李重新建立信任。",
   endingAccepted: "体验结束。你经历了信任、边界和服务关系中断。",
   endingRejected: "体验结束。你经历了信任、边界和服务关系中断。",
   endingConsulted: "体验结束。你经历了信任、边界和服务关系中断。",
+  endingBoundary: "体验结束。你经历了信任、边界和服务关系中断。",
 };
 
 function stars(value) {
@@ -1233,7 +1253,7 @@ function dialogue(speaker, lines) {
   `;
 }
 
-function choiceList(choices) {
+function choiceList(action, choices) {
   return `
     <div class="choice-list" aria-label="请选择回应">
       ${choices
@@ -1242,7 +1262,7 @@ function choiceList(choices) {
             <button
               class="choice-button"
               type="button"
-              data-action="first-visit-choice"
+              data-action="${action}"
               data-choice="${choice}"
               aria-label="${key}，${label}"
             >
@@ -1414,7 +1434,7 @@ function renderFirstVisit() {
       </section>
       ${dialogue("王奶奶", ["谁啊？"])}
       <p class="prompt">你该怎么回答？</p>
-      ${choiceList([
+      ${choiceList("first-visit-choice", [
         { key: "A", label: "您好，我是平台安排的服务人员。", choice: "platform" },
         { key: "B", label: "您好，我是您女儿的朋友。", choice: "friend" },
         { key: "C", label: "您好，我是来照顾您的。", choice: "care" },
@@ -1474,8 +1494,43 @@ function renderTrustDay3() {
         "小陈和王奶奶坐在客厅桌边聊天，桌上的茶杯还冒着热气。",
         { wide: true, caption: "第三次服务" },
       )}
-      ${dialogue("王奶奶", ["小陈，你来了。", "你还记得我喜欢吃什么，挺细心的。"])}
-      ${trustPanel({ elder: 3, elderTransition: { from: 2, to: 3 } })}
+      ${dialogue("王奶奶", ["小陈，你来了。"])}
+      <p class="prompt">这次上门，你给王奶奶带了什么？</p>
+      ${choiceList("food-choice", [
+        { key: "A", label: "我给您带了酱鸭。", choice: "duck" },
+        { key: "B", label: "我买了您爱吃的菜。", choice: "dish" },
+        {
+          key: "C",
+          label: "上次您说去旅游吃的美食吃不到了，我给您网购了一些。",
+          choice: "travel",
+        },
+      ])}
+    `,
+  );
+}
+
+function renderTrustDay3Response(choice) {
+  const playerLines = {
+    duck: "我给您带了酱鸭。",
+    dish: "我买了您爱吃的菜。",
+    travel: "上次您说去旅游吃的美食吃不到了，我给您网购了一些。",
+  };
+
+  return pageShell(
+    "",
+    `
+      <div>
+        <p class="scene-kicker">场景 02 · 逐渐建立信任</p>
+        <h2 class="scene-title" tabindex="-1">慢慢熟悉</h2>
+      </div>
+      <div class="day-marker"><span>03</span> 第 3 次服务</div>
+      ${art("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MDAgNjkwIiByb2xlPSJpbWciIGFyaWEtbGFiZWxsZWRieT0idGl0bGUgZGVzYyI+CiAgPHRpdGxlIGlkPSJ0aXRsZSI+6YCQ5riQ5bu656uL5L+h5Lu7PC90aXRsZT4KICA8ZGVzYyBpZD0iZGVzYyI+5bCP6ZmI5ZKM546L5aW25aW25Z2Q5Zyo5pqW6Imy5a6i5Y6F6YeM6IGK5aSp77yM5qGM5LiK5pS+552A5Lik5p2v54Ot6Iy244CCPC9kZXNjPgogIDxkZWZzPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJ3YWxsIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2VhZDliZiIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNiZDlhNzQiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9IndpbmRvdyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNmZmY1ZGEiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjOWNhZTllIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJ3b29kIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzhlNWUzZSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM0ZTM1MjciLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8cmFkaWFsR3JhZGllbnQgaWQ9Imdsb3ciPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNmZmY3ZGMiIHN0b3Atb3BhY2l0eT0iLjgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjZjVjNDc3IiBzdG9wLW9wYWNpdHk9IjAiLz4KICAgIDwvcmFkaWFsR3JhZGllbnQ+CiAgICA8ZmlsdGVyIGlkPSJncmFpbiI+CiAgICAgIDxmZVR1cmJ1bGVuY2UgYmFzZUZyZXF1ZW5jeT0iLjg2IiBudW1PY3RhdmVzPSIzIiBzZWVkPSIxNyIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+CiAgICAgIDxmZUNvbG9yTWF0cml4IHZhbHVlcz0iMSAwIDAgMCAwIDAgMSAwIDAgMCAwIDAgMSAwIDAgMCAwIDAgLjEzIDAiLz4KICAgIDwvZmlsdGVyPgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjY5MCIgZmlsbD0idXJsKCN3YWxsKSIvPgogIDxlbGxpcHNlIGN4PSI1OTUiIGN5PSIxODYiIHJ4PSIzNDAiIHJ5PSIzMTAiIGZpbGw9InVybCgjZ2xvdykiLz4KICA8ZyBvcGFjaXR5PSIuODMiPgogICAgPHJlY3QgeD0iNTAxIiB5PSI2MCIgd2lkdGg9IjIyOSIgaGVpZ2h0PSIyNTAiIHJ4PSI1IiBmaWxsPSIjNzg1YTQzIi8+CiAgICA8cmVjdCB4PSI1MTUiIHk9Ijc0IiB3aWR0aD0iMjAxIiBoZWlnaHQ9IjIyMiIgZmlsbD0idXJsKCN3aW5kb3cpIi8+CiAgICA8cGF0aCBkPSJNNTI1IDI1NGM1My02NiAxMTItNzQgMTc4LTE0MHYxODJINTI1WiIgZmlsbD0iIzZmOGU3OSIgb3BhY2l0eT0iLjU1Ii8+CiAgICA8cGF0aCBkPSJNNjE1IDc0djIyMk01MTUgMTg4aDIwMSIgc3Ryb2tlPSIjZmZmOWVjIiBzdHJva2Utd2lkdGg9IjgiLz4KICAgIDxwYXRoIGQ9Ik00OTEgNTNjLTEwIDY1LTEzIDE1NC02IDI0NSAyOS0xMSAzMC0yMiAzMC01NCAxLTY3LTUtMTQ2LTExLTE5MVoiIGZpbGw9IiM2ZjUxM2UiIG9wYWNpdHk9Ii42Ii8+CiAgICA8cGF0aCBkPSJNNzQyIDUwYzE2IDY1IDIwIDE2MCA4IDI1NS0yOC0xMy0zMS0yNi0zMS02MSAwLTc0IDUtMTQ5IDEzLTE5NFoiIGZpbGw9IiM2YjRmM2MiIG9wYWNpdHk9Ii42NSIvPgogIDwvZz4KICA8cGF0aCBkPSJNMCA1MzVjMTM0LTM5IDIyNS0yMSAzMzEtMjggMTQyLTkgMjc2IDggNDY5IDE4djE2NUgwWiIgZmlsbD0iIzlhNzU1MyIgb3BhY2l0eT0iLjI1Ii8+CiAgPGc+CiAgICA8ZWxsaXBzZSBjeD0iMzkxIiBjeT0iNjI2IiByeD0iMzI1IiByeT0iMzgiIGZpbGw9IiM0YzM0MjQiIG9wYWNpdHk9Ii4yMiIvPgogICAgPHBhdGggZD0iTTQ2IDQ4NGg2OTBjMjAgMCAzNCAxNCAzNCAzNXYyMWMwIDIxLTE2IDM3LTM3IDM3SDQyYy0xOCAwLTMyLTE0LTMyLTMydi0yNWMwLTIwIDE0LTM2IDM2LTM2WiIgZmlsbD0idXJsKCN3b29kKSIvPgogICAgPHBhdGggZD0iTTU1IDU2Mmg2NzFsMjcgOTBoLTQ3bC0yNS01MkgxMDJsLTI1IDUySDI2WiIgZmlsbD0iIzVjM2IyOCIvPgogICAgPHBhdGggZD0iTTE1MSA1NjcgMTE2IDY3NE02MzcgNTY3bDM1IDEwNyIgc3Ryb2tlPSIjNDIyYjFkIiBzdHJva2Utd2lkdGg9IjIwIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8L2c+CiAgPGc+CiAgICA8cGF0aCBkPSJNNjcgNDAyYzIxLTc5IDc4LTExMiAxNTItODQgNDItNDUgMTA0LTI1IDExMiAzMyA1MiAyMSA2MCA3OCAzMiAxNDNsLTMxMSAxYy03LTQwLTQtNjkgMTUtOTNaIiBmaWxsPSIjOGI4MTcxIi8+CiAgICA8cGF0aCBkPSJNODkgMzk5YzMxLTUwIDc3LTYyIDEyNi0zMCAzMC0yOCA3NS0xNyA4NCAyOSA0NCAyMCA0NCA1NSAyMyA5NUg5MWMtMTUtMzEtMTUtNjItMi05NFoiIGZpbGw9IiNiMmEzOGMiLz4KICAgIDxwYXRoIGQ9Ik0yOTggMzY4YzEyLTY2IDY3LTExMiAxMzctMTAyIDIyLTYwIDkzLTYxIDEyMC01IDY0IDcgOTEgNTcgNzcgMTI4LTExIDU1LTU0IDc1LTExNCA3MUgzNjljLTYwLTktODQtMzUtNzEtOTJaIiBmaWxsPSIjNzY1NzQ3Ii8+CiAgICA8cGF0aCBkPSJNMzM4IDM3N2MxNS00OSA1My03OCAxMDQtNzQgMjUtNDQgODMtMzkgMTAyIDQgNTAgMTUgNTggNTkgNDUgMTA0LTEwIDM1LTQ1IDQ3LTk1IDQySDM3M2MtNDAtNy00OC0zMi0zNS03NloiIGZpbGw9IiM5OTcxNTkiLz4KICA8L2c+CiAgPGc+CiAgICA8cGF0aCBkPSJNMzI3IDI4NWMtMzEgMzYtMzUgMTE5LTI1IDIxM2gxNjBjMTEtOTkgNC0xNjctMjgtMjE1WiIgZmlsbD0iI2RiYzVhYyIvPgogICAgPGVsbGlwc2UgY3g9IjM5NCIgY3k9IjIyOSIgcng9IjYyIiByeT0iNzIiIGZpbGw9IiNkOGFhODQiLz4KICAgIDxwYXRoIGQ9Ik0zMzAgMjI0Yy0zLTUxIDMyLTgzIDc3LTc1IDM2IDYgNTggMzQgNTEgNzYtMjUtMTQtNDktMzAtNjktNDQtMTUgMjMtMzQgMzQtNTkgNDNaIiBmaWxsPSIjM2QzMTJiIi8+CiAgICA8cGF0aCBkPSJNMzMzIDIxNmMtMTEgMTctMTAgNDAgMSA1MiA5LTUgMTMtMTQgMTMtMjVaIiBmaWxsPSIjYzQ5MjcwIi8+CiAgICA8ZWxsaXBzZSBjeD0iMzczIiBjeT0iMjI4IiByeD0iNCIgcnk9IjUiIGZpbGw9IiMzZDJlMjkiLz4KICAgIDxlbGxpcHNlIGN4PSI0MTQiIGN5PSIyMjYiIHJ4PSI0IiByeT0iNSIgZmlsbD0iIzNkMmUyOSIvPgogICAgPHBhdGggZD0iTTM3OCAyNTNjNyA0IDE1IDQgMjEtMSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjOWY2NzU0IiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogICAgPHBhdGggZD0iTTM0OSAyNTZjNiAyNSAyMiAzNyAzOCAyMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYmI4NTY0IiBzdHJva2Utd2lkdGg9IjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogICAgPHBhdGggZD0iTTM0NSAzMjhoOThsMjcgMTQ5SDMxOVoiIGZpbGw9IiM4NDZjNjAiLz4KICAgIDxwYXRoIGQ9Ik0zODEgMzI0djE0N000MDYgMzI0djE0NyIgc3Ryb2tlPSIjYjc5ZDhkIiBzdHJva2Utd2lkdGg9IjQiLz4KICA8L2c+CiAgPGc+CiAgICA8cGF0aCBkPSJNNTY4IDMzOGMtMjkgMzgtMjUgODQtOSAxMzJoMTIyYzEyLTU5IDMtMTA5LTI1LTEzNloiIGZpbGw9IiNkZmMzYTUiLz4KICAgIDxwYXRoIGQ9Ik01NTkgMzAyYy01LTU0IDMzLTkxIDgyLTg0IDQxIDYgNjcgNDAgNTcgODktMjgtMTMtNTItMjgtNzItNDYtMTYgMjQtMzcgMzctNjcgNDFaIiBmaWxsPSIjNGMzYjMzIi8+CiAgICA8ZWxsaXBzZSBjeD0iNjI4IiBjeT0iMzAxIiByeD0iNjMiIHJ5PSI3MSIgZmlsbD0iI2Q0YTI3YyIvPgogICAgPGVsbGlwc2UgY3g9IjYwOSIgY3k9IjMwMyIgcng9IjQiIHJ5PSI1IiBmaWxsPSIjM2IyZDI3Ii8+CiAgICA8ZWxsaXBzZSBjeD0iNjQ5IiBjeT0iMzAwIiByeD0iNCIgcnk9IjUiIGZpbGw9IiMzYjJkMjciLz4KICAgIDxwYXRoIGQ9Ik02MTggMzI2YzcgNCAxNCA0IDIwLTEiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzk1NjA0NyIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICAgIDxwYXRoIGQ9Ik01NzIgMzk4aDEwOWwxNyA3Mkg1NTFaIiBmaWxsPSIjNmE3MDY5Ii8+CiAgICA8cGF0aCBkPSJNNTk2IDM4OGM4IDkgNTAgOSA1OCAwIiBmaWxsPSJub25lIiBzdHJva2U9IiM0ZTQwMzgiIHN0cm9rZS13aWR0aD0iNCIvPgogIDwvZz4KICA8Zz4KICAgIDxlbGxpcHNlIGN4PSI0ODciIGN5PSI1MDUiIHJ4PSI4NSIgcnk9IjE5IiBmaWxsPSIjNGIzMjIyIiBvcGFjaXR5PSIuMiIvPgogICAgPHBhdGggZD0iTTM2NyA0NjFoNTRsLTkgNDJjLTggMTYtMzEgMTYtMzggMFoiIGZpbGw9IiNmN2VmZGYiLz4KICAgIDxwYXRoIGQ9Ik00MTQgNDcwYzI5LTQgMzMgMjYgMSAyNiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZjdlZmRmIiBzdHJva2Utd2lkdGg9IjgiLz4KICAgIDxwYXRoIGQ9Ik0zOTMgNDU4Yy01LTE1IDExLTE5IDYtMzVNNDEyIDQ1NmMtNS0xNSAxMS0yMCA2LTM1IiBmaWxsPSJub25lIiBzdHJva2U9IiNjNGIwOTIiIHN0cm9rZS13aWR0aD0iMyIvPgogICAgPHBhdGggZD0iTTU3MSA0NjZoNTFsLTggMzhjLTcgMTQtMjggMTQtMzUgMFoiIGZpbGw9IiNmN2VmZGYiLz4KICAgIDxwYXRoIGQ9Ik02MTUgNDc0YzI1LTMgMjkgMjQgMSAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZjdlZmRmIiBzdHJva2Utd2lkdGg9IjgiLz4KICAgIDxwYXRoIGQ9Ik01ODcgNDYyYy01LTE0IDEwLTE4IDYtMzNNNjA0IDQ2MGMtNS0xNCAxMC0xOCA2LTMzIiBmaWxsPSJub25lIiBzdHJva2U9IiNjNGIwOTIiIHN0cm9rZS13aWR0aD0iMyIvPgogIDwvZz4KICA8cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjY5MCIgZmlsdGVyPSJ1cmwoI2dyYWluKSIgb3BhY2l0eT0iLjI1Ii8+Cjwvc3ZnPgo=",
+        "小陈带着食物来到王奶奶家，两人坐在桌边聊天。",
+        { wide: true, caption: "第三次服务" },
+      )}
+      ${dialogue("小陈", [playerLines[choice]])}
+      ${dialogue("王奶奶", ["你还记得我喜欢吃什么，挺细心的。"])}
+      ${trustPanel({ elder: 3 })}
       <div class="action-row">${primaryButton("trust-next-day3", "继续服务")}</div>
     `,
   );
@@ -1494,10 +1549,43 @@ function renderTrustDay7() {
         "王奶奶和小陈熟悉地坐在桌边交谈，两人之间的距离近了一些。",
         { wide: true, caption: "第七次服务" },
       )}
-      ${dialogue("王奶奶", [
-        "你上次说喜欢喝茶吧？",
-        "我这里有一些老家寄来的茶叶，改天给你拿一点。",
+      ${dialogue("王奶奶", ["小陈，你问了这么多我的喜好，我还不知道你喜欢什么？"])}
+      ${trustPanel({ elder: 3 })}
+      <p class="prompt">你会怎么回答？</p>
+      ${choiceList("preference-choice", [
+        { key: "A", label: "我喜欢打游戏。", choice: "gaming" },
+        { key: "B", label: "我喜欢小猫猫。", choice: "cats" },
+        { key: "C", label: "我喜欢喝茶。", choice: "tea" },
       ])}
+    `,
+  );
+}
+
+function renderTrustDay7Response(choice) {
+  const playerLines = {
+    gaming: "我喜欢打游戏。",
+    cats: "我喜欢小猫猫。",
+    tea: "我喜欢喝茶。",
+  };
+  const elderLines =
+    choice === "tea"
+      ? ["我这有一些老家寄来的茶叶，改天给你拿一点。"]
+      : ["哦，是你们年轻人喜欢的……挺好。"];
+
+  return pageShell(
+    "",
+    `
+      <div>
+        <p class="scene-kicker">场景 02 · 逐渐建立信任</p>
+        <h2 class="scene-title" tabindex="-1">一点点靠近</h2>
+      </div>
+      <div class="day-marker"><span>07</span> 第 7 次服务</div>
+      ${art("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MDAgNjkwIiByb2xlPSJpbWciIGFyaWEtbGFiZWxsZWRieT0idGl0bGUgZGVzYyI+CiAgPHRpdGxlIGlkPSJ0aXRsZSI+6YCQ5riQ5bu656uL5L+h5Lu7PC90aXRsZT4KICA8ZGVzYyBpZD0iZGVzYyI+5bCP6ZmI5ZKM546L5aW25aW25Z2Q5Zyo5pqW6Imy5a6i5Y6F6YeM6IGK5aSp77yM5qGM5LiK5pS+552A5Lik5p2v54Ot6Iy244CCPC9kZXNjPgogIDxkZWZzPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJ3YWxsIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2VhZDliZiIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNiZDlhNzQiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9IndpbmRvdyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNmZmY1ZGEiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjOWNhZTllIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJ3b29kIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzhlNWUzZSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM0ZTM1MjciLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8cmFkaWFsR3JhZGllbnQgaWQ9Imdsb3ciPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNmZmY3ZGMiIHN0b3Atb3BhY2l0eT0iLjgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjZjVjNDc3IiBzdG9wLW9wYWNpdHk9IjAiLz4KICAgIDwvcmFkaWFsR3JhZGllbnQ+CiAgICA8ZmlsdGVyIGlkPSJncmFpbiI+CiAgICAgIDxmZVR1cmJ1bGVuY2UgYmFzZUZyZXF1ZW5jeT0iLjg2IiBudW1PY3RhdmVzPSIzIiBzZWVkPSIxNyIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+CiAgICAgIDxmZUNvbG9yTWF0cml4IHZhbHVlcz0iMSAwIDAgMCAwIDAgMSAwIDAgMCAwIDAgMSAwIDAgMCAwIDAgLjEzIDAiLz4KICAgIDwvZmlsdGVyPgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjY5MCIgZmlsbD0idXJsKCN3YWxsKSIvPgogIDxlbGxpcHNlIGN4PSI1OTUiIGN5PSIxODYiIHJ4PSIzNDAiIHJ5PSIzMTAiIGZpbGw9InVybCgjZ2xvdykiLz4KICA8ZyBvcGFjaXR5PSIuODMiPgogICAgPHJlY3QgeD0iNTAxIiB5PSI2MCIgd2lkdGg9IjIyOSIgaGVpZ2h0PSIyNTAiIHJ4PSI1IiBmaWxsPSIjNzg1YTQzIi8+CiAgICA8cmVjdCB4PSI1MTUiIHk9Ijc0IiB3aWR0aD0iMjAxIiBoZWlnaHQ9IjIyMiIgZmlsbD0idXJsKCN3aW5kb3cpIi8+CiAgICA8cGF0aCBkPSJNNTI1IDI1NGM1My02NiAxMTItNzQgMTc4LTE0MHYxODJINTI1WiIgZmlsbD0iIzZmOGU3OSIgb3BhY2l0eT0iLjU1Ii8+CiAgICA8cGF0aCBkPSJNNjE1IDc0djIyMk01MTUgMTg4aDIwMSIgc3Ryb2tlPSIjZmZmOWVjIiBzdHJva2Utd2lkdGg9IjgiLz4KICAgIDxwYXRoIGQ9Ik00OTEgNTNjLTEwIDY1LTEzIDE1NC02IDI0NSAyOS0xMSAzMC0yMiAzMC01NCAxLTY3LTUtMTQ2LTExLTE5MVoiIGZpbGw9IiM2ZjUxM2UiIG9wYWNpdHk9Ii42Ii8+CiAgICA8cGF0aCBkPSJNNzQyIDUwYzE2IDY1IDIwIDE2MCA4IDI1NS0yOC0xMy0zMS0yNi0zMS02MSAwLTc0IDUtMTQ5IDEzLTE5NFoiIGZpbGw9IiM2YjRmM2MiIG9wYWNpdHk9Ii42NSIvPgogIDwvZz4KICA8cGF0aCBkPSJNMCA1MzVjMTM0LTM5IDIyNS0yMSAzMzEtMjggMTQyLTkgMjc2IDggNDY5IDE4djE2NUgwWiIgZmlsbD0iIzlhNzU1MyIgb3BhY2l0eT0iLjI1Ii8+CiAgPGc+CiAgICA8ZWxsaXBzZSBjeD0iMzkxIiBjeT0iNjI2IiByeD0iMzI1IiByeT0iMzgiIGZpbGw9IiM0YzM0MjQiIG9wYWNpdHk9Ii4yMiIvPgogICAgPHBhdGggZD0iTTQ2IDQ4NGg2OTBjMjAgMCAzNCAxNCAzNCAzNXYyMWMwIDIxLTE2IDM3LTM3IDM3SDQyYy0xOCAwLTMyLTE0LTMyLTMydi0yNWMwLTIwIDE0LTM2IDM2LTM2WiIgZmlsbD0idXJsKCN3b29kKSIvPgogICAgPHBhdGggZD0iTTU1IDU2Mmg2NzFsMjcgOTBoLTQ3bC0yNS01MkgxMDJsLTI1IDUySDI2WiIgZmlsbD0iIzVjM2IyOCIvPgogICAgPHBhdGggZD0iTTE1MSA1NjcgMTE2IDY3NE02MzcgNTY3bDM1IDEwNyIgc3Ryb2tlPSIjNDIyYjFkIiBzdHJva2Utd2lkdGg9IjIwIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8L2c+CiAgPGc+CiAgICA8cGF0aCBkPSJNNjcgNDAyYzIxLTc5IDc4LTExMiAxNTItODQgNDItNDUgMTA0LTI1IDExMiAzMyA1MiAyMSA2MCA3OCAzMiAxNDNsLTMxMSAxYy03LTQwLTQtNjkgMTUtOTNaIiBmaWxsPSIjOGI4MTcxIi8+CiAgICA8cGF0aCBkPSJNODkgMzk5YzMxLTUwIDc3LTYyIDEyNi0zMCAzMC0yOCA3NS0xNyA4NCAyOSA0NCAyMCA0NCA1NSAyMyA5NUg5MWMtMTUtMzEtMTUtNjItMi05NFoiIGZpbGw9IiNiMmEzOGMiLz4KICAgIDxwYXRoIGQ9Ik0yOTggMzY4YzEyLTY2IDY3LTExMiAxMzctMTAyIDIyLTYwIDkzLTYxIDEyMC01IDY0IDcgOTEgNTcgNzcgMTI4LTExIDU1LTU0IDc1LTExNCA3MUgzNjljLTYwLTktODQtMzUtNzEtOTJaIiBmaWxsPSIjNzY1NzQ3Ii8+CiAgICA8cGF0aCBkPSJNMzM4IDM3N2MxNS00OSA1My03OCAxMDQtNzQgMjUtNDQgODMtMzkgMTAyIDQgNTAgMTUgNTggNTkgNDUgMTA0LTEwIDM1LTQ1IDQ3LTk1IDQySDM3M2MtNDAtNy00OC0zMi0zNS03NloiIGZpbGw9IiM5OTcxNTkiLz4KICA8L2c+CiAgPGc+CiAgICA8cGF0aCBkPSJNMzI3IDI4NWMtMzEgMzYtMzUgMTE5LTI1IDIxM2gxNjBjMTEtOTkgNC0xNjctMjgtMjE1WiIgZmlsbD0iI2RiYzVhYyIvPgogICAgPGVsbGlwc2UgY3g9IjM5NCIgY3k9IjIyOSIgcng9IjYyIiByeT0iNzIiIGZpbGw9IiNkOGFhODQiLz4KICAgIDxwYXRoIGQ9Ik0zMzAgMjI0Yy0zLTUxIDMyLTgzIDc3LTc1IDM2IDYgNTggMzQgNTEgNzYtMjUtMTQtNDktMzAtNjktNDQtMTUgMjMtMzQgMzQtNTkgNDNaIiBmaWxsPSIjM2QzMTJiIi8+CiAgICA8cGF0aCBkPSJNMzMzIDIxNmMtMTEgMTctMTAgNDAgMSA1MiA5LTUgMTMtMTQgMTMtMjVaIiBmaWxsPSIjYzQ5MjcwIi8+CiAgICA8ZWxsaXBzZSBjeD0iMzczIiBjeT0iMjI4IiByeD0iNCIgcnk9IjUiIGZpbGw9IiMzZDJlMjkiLz4KICAgIDxlbGxpcHNlIGN4PSI0MTQiIGN5PSIyMjYiIHJ4PSI0IiByeT0iNSIgZmlsbD0iIzNkMmUyOSIvPgogICAgPHBhdGggZD0iTTM3OCAyNTNjNyA0IDE1IDQgMjEtMSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjOWY2NzU0IiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogICAgPHBhdGggZD0iTTM0OSAyNTZjNiAyNSAyMiAzNyAzOCAyMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYmI4NTY0IiBzdHJva2Utd2lkdGg9IjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogICAgPHBhdGggZD0iTTM0NSAzMjhoOThsMjcgMTQ5SDMxOVoiIGZpbGw9IiM4NDZjNjAiLz4KICAgIDxwYXRoIGQ9Ik0zODEgMzI0djE0N000MDYgMzI0djE0NyIgc3Ryb2tlPSIjYjc5ZDhkIiBzdHJva2Utd2lkdGg9IjQiLz4KICA8L2c+CiAgPGc+CiAgICA8cGF0aCBkPSJNNTY4IDMzOGMtMjkgMzgtMjUgODQtOSAxMzJoMTIyYzEyLTU5IDMtMTA5LTI1LTEzNloiIGZpbGw9IiNkZmMzYTUiLz4KICAgIDxwYXRoIGQ9Ik01NTkgMzAyYy01LTU0IDMzLTkxIDgyLTg0IDQxIDYgNjcgNDAgNTcgODktMjgtMTMtNTItMjgtNzItNDYtMTYgMjQtMzcgMzctNjcgNDFaIiBmaWxsPSIjNGMzYjMzIi8+CiAgICA8ZWxsaXBzZSBjeD0iNjI4IiBjeT0iMzAxIiByeD0iNjMiIHJ5PSI3MSIgZmlsbD0iI2Q0YTI3YyIvPgogICAgPGVsbGlwc2UgY3g9IjYwOSIgY3k9IjMwMyIgcng9IjQiIHJ5PSI1IiBmaWxsPSIjM2IyZDI3Ii8+CiAgICA8ZWxsaXBzZSBjeD0iNjQ5IiBjeT0iMzAwIiByeD0iNCIgcnk9IjUiIGZpbGw9IiMzYjJkMjciLz4KICAgIDxwYXRoIGQ9Ik02MTggMzI2YzcgNCAxNCA0IDIwLTEiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzk1NjA0NyIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICAgIDxwYXRoIGQ9Ik01NzIgMzk4aDEwOWwxNyA3Mkg1NTFaIiBmaWxsPSIjNmE3MDY5Ii8+CiAgICA8cGF0aCBkPSJNNTk2IDM4OGM4IDkgNTAgOSA1OCAwIiBmaWxsPSJub25lIiBzdHJva2U9IiM0ZTQwMzgiIHN0cm9rZS13aWR0aD0iNCIvPgogIDwvZz4KICA8Zz4KICAgIDxlbGxpcHNlIGN4PSI0ODciIGN5PSI1MDUiIHJ4PSI4NSIgcnk9IjE5IiBmaWxsPSIjNGIzMjIyIiBvcGFjaXR5PSIuMiIvPgogICAgPHBhdGggZD0iTTM2NyA0NjFoNTRsLTkgNDJjLTggMTYtMzEgMTYtMzggMFoiIGZpbGw9IiNmN2VmZGYiLz4KICAgIDxwYXRoIGQ9Ik00MTQgNDcwYzI5LTQgMzMgMjYgMSAyNiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZjdlZmRmIiBzdHJva2Utd2lkdGg9IjgiLz4KICAgIDxwYXRoIGQ9Ik0zOTMgNDU4Yy01LTE1IDExLTE5IDYtMzVNNDEyIDQ1NmMtNS0xNSAxMS0yMCA2LTM1IiBmaWxsPSJub25lIiBzdHJva2U9IiNjNGIwOTIiIHN0cm9rZS13aWR0aD0iMyIvPgogICAgPHBhdGggZD0iTTU3MSA0NjZoNTFsLTggMzhjLTcgMTQtMjggMTQtMzUgMFoiIGZpbGw9IiNmN2VmZGYiLz4KICAgIDxwYXRoIGQ9Ik02MTUgNDc0YzI1LTMgMjkgMjQgMSAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZjdlZmRmIiBzdHJva2Utd2lkdGg9IjgiLz4KICAgIDxwYXRoIGQ9Ik01ODcgNDYyYy01LTE0IDEwLTE4IDYtMzNNNjA0IDQ2MGMtNS0xNCAxMC0xOCA2LTMzIiBmaWxsPSJub25lIiBzdHJva2U9IiNjNGIwOTIiIHN0cm9rZS13aWR0aD0iMyIvPgogIDwvZz4KICA8cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjY5MCIgZmlsdGVyPSJ1cmwoI2dyYWluKSIgb3BhY2l0eT0iLjI1Ii8+Cjwvc3ZnPgo=",
+        "王奶奶听小陈讲自己的喜好，两人在桌边继续聊天。",
+        { wide: true, caption: "第七次服务" },
+      )}
+      ${dialogue("小陈", [playerLines[choice]])}
+      ${dialogue("王奶奶", elderLines)}
       ${trustPanel({ elder: 3 })}
       <div class="action-row">${primaryButton("trust-next-day7", "继续服务")}</div>
     `,
@@ -1517,13 +1605,65 @@ function renderTrustDay12() {
         "多次服务之后，王奶奶和小陈已经能自然地聊起家常。",
         { wide: true, caption: "第十二次服务" },
       )}
-      ${dialogue("王奶奶", [
-        "以后如果我有什么事情，可以直接给你打电话吗？",
-        "那就好。我现在觉得你就跟自己孩子一样。",
+      ${dialogue("王奶奶", ["以后如果我有什么事情，可以直接给你打电话吗？"])}
+      ${trustPanel({ elder: 3 })}
+      <p class="prompt">你会怎么回应？</p>
+      ${choiceList("contact-choice", [
+        { key: "A", label: "当然了，您直接打给我就行。", choice: "call" },
+        {
+          key: "B",
+          label: "我平时也挺忙的，您有事还是找您女儿吧。",
+          choice: "daughter",
+        },
       ])}
+    `,
+  );
+}
+
+function renderTrustDay12Accepted() {
+  return pageShell(
+    "",
+    `
+      <div>
+        <p class="scene-kicker">场景 02 · 逐渐建立信任</p>
+        <h2 class="scene-title" tabindex="-1">“像自己孩子一样”</h2>
+      </div>
+      <div class="day-marker"><span>12</span> 第 12 次服务</div>
+      ${art("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MDAgNjkwIiByb2xlPSJpbWciIGFyaWEtbGFiZWxsZWRieT0idGl0bGUgZGVzYyI+CiAgPHRpdGxlIGlkPSJ0aXRsZSI+6YCQ5riQ5bu656uL5L+h5Lu7PC90aXRsZT4KICA8ZGVzYyBpZD0iZGVzYyI+5bCP6ZmI5ZKM546L5aW25aW25Z2Q5Zyo5pqW6Imy5a6i5Y6F6YeM6IGK5aSp77yM5qGM5LiK5pS+552A5Lik5p2v54Ot6Iy244CCPC9kZXNjPgogIDxkZWZzPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJ3YWxsIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2VhZDliZiIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNiZDlhNzQiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9IndpbmRvdyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNmZmY1ZGEiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjOWNhZTllIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJ3b29kIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzhlNWUzZSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM0ZTM1MjciLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8cmFkaWFsR3JhZGllbnQgaWQ9Imdsb3ciPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNmZmY3ZGMiIHN0b3Atb3BhY2l0eT0iLjgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjZjVjNDc3IiBzdG9wLW9wYWNpdHk9IjAiLz4KICAgIDwvcmFkaWFsR3JhZGllbnQ+CiAgICA8ZmlsdGVyIGlkPSJncmFpbiI+CiAgICAgIDxmZVR1cmJ1bGVuY2UgYmFzZUZyZXF1ZW5jeT0iLjg2IiBudW1PY3RhdmVzPSIzIiBzZWVkPSIxNyIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+CiAgICAgIDxmZUNvbG9yTWF0cml4IHZhbHVlcz0iMSAwIDAgMCAwIDAgMSAwIDAgMCAwIDAgMSAwIDAgMCAwIDAgLjEzIDAiLz4KICAgIDwvZmlsdGVyPgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjY5MCIgZmlsbD0idXJsKCN3YWxsKSIvPgogIDxlbGxpcHNlIGN4PSI1OTUiIGN5PSIxODYiIHJ4PSIzNDAiIHJ5PSIzMTAiIGZpbGw9InVybCgjZ2xvdykiLz4KICA8ZyBvcGFjaXR5PSIuODMiPgogICAgPHJlY3QgeD0iNTAxIiB5PSI2MCIgd2lkdGg9IjIyOSIgaGVpZ2h0PSIyNTAiIHJ4PSI1IiBmaWxsPSIjNzg1YTQzIi8+CiAgICA8cmVjdCB4PSI1MTUiIHk9Ijc0IiB3aWR0aD0iMjAxIiBoZWlnaHQ9IjIyMiIgZmlsbD0idXJsKCN3aW5kb3cpIi8+CiAgICA8cGF0aCBkPSJNNTI1IDI1NGM1My02NiAxMTItNzQgMTc4LTE0MHYxODJINTI1WiIgZmlsbD0iIzZmOGU3OSIgb3BhY2l0eT0iLjU1Ii8+CiAgICA8cGF0aCBkPSJNNjE1IDc0djIyMk01MTUgMTg4aDIwMSIgc3Ryb2tlPSIjZmZmOWVjIiBzdHJva2Utd2lkdGg9IjgiLz4KICAgIDxwYXRoIGQ9Ik00OTEgNTNjLTEwIDY1LTEzIDE1NC02IDI0NSAyOS0xMSAzMC0yMiAzMC01NCAxLTY3LTUtMTQ2LTExLTE5MVoiIGZpbGw9IiM2ZjUxM2UiIG9wYWNpdHk9Ii42Ii8+CiAgICA8cGF0aCBkPSJNNzQyIDUwYzE2IDY1IDIwIDE2MCA4IDI1NS0yOC0xMy0zMS0yNi0zMS02MSAwLTc0IDUtMTQ5IDEzLTE5NFoiIGZpbGw9IiM2YjRmM2MiIG9wYWNpdHk9Ii42NSIvPgogIDwvZz4KICA8cGF0aCBkPSJNMCA1MzVjMTM0LTM5IDIyNS0yMSAzMzEtMjggMTQyLTkgMjc2IDggNDY5IDE4djE2NUgwWiIgZmlsbD0iIzlhNzU1MyIgb3BhY2l0eT0iLjI1Ii8+CiAgPGc+CiAgICA8ZWxsaXBzZSBjeD0iMzkxIiBjeT0iNjI2IiByeD0iMzI1IiByeT0iMzgiIGZpbGw9IiM0YzM0MjQiIG9wYWNpdHk9Ii4yMiIvPgogICAgPHBhdGggZD0iTTQ2IDQ4NGg2OTBjMjAgMCAzNCAxNCAzNCAzNXYyMWMwIDIxLTE2IDM3LTM3IDM3SDQyYy0xOCAwLTMyLTE0LTMyLTMydi0yNWMwLTIwIDE0LTM2IDM2LTM2WiIgZmlsbD0idXJsKCN3b29kKSIvPgogICAgPHBhdGggZD0iTTU1IDU2Mmg2NzFsMjcgOTBoLTQ3bC0yNS01MkgxMDJsLTI1IDUySDI2WiIgZmlsbD0iIzVjM2IyOCIvPgogICAgPHBhdGggZD0iTTE1MSA1NjcgMTE2IDY3NE02MzcgNTY3bDM1IDEwNyIgc3Ryb2tlPSIjNDIyYjFkIiBzdHJva2Utd2lkdGg9IjIwIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8L2c+CiAgPGc+CiAgICA8cGF0aCBkPSJNNjcgNDAyYzIxLTc5IDc4LTExMiAxNTItODQgNDItNDUgMTA0LTI1IDExMiAzMyA1MiAyMSA2MCA3OCAzMiAxNDNsLTMxMSAxYy03LTQwLTQtNjkgMTUtOTNaIiBmaWxsPSIjOGI4MTcxIi8+CiAgICA8cGF0aCBkPSJNODkgMzk5YzMxLTUwIDc3LTYyIDEyNi0zMCAzMC0yOCA3NS0xNyA4NCAyOSA0NCAyMCA0NCA1NSAyMyA5NUg5MWMtMTUtMzEtMTUtNjItMi05NFoiIGZpbGw9IiNiMmEzOGMiLz4KICAgIDxwYXRoIGQ9Ik0yOTggMzY4YzEyLTY2IDY3LTExMiAxMzctMTAyIDIyLTYwIDkzLTYxIDEyMC01IDY0IDcgOTEgNTcgNzcgMTI4LTExIDU1LTU0IDc1LTExNCA3MUgzNjljLTYwLTktODQtMzUtNzEtOTJaIiBmaWxsPSIjNzY1NzQ3Ii8+CiAgICA8cGF0aCBkPSJNMzM4IDM3N2MxNS00OSA1My03OCAxMDQtNzQgMjUtNDQgODMtMzkgMTAyIDQgNTAgMTUgNTggNTkgNDUgMTA0LTEwIDM1LTQ1IDQ3LTk1IDQySDM3M2MtNDAtNy00OC0zMi0zNS03NloiIGZpbGw9IiM5OTcxNTkiLz4KICA8L2c+CiAgPGc+CiAgICA8cGF0aCBkPSJNMzI3IDI4NWMtMzEgMzYtMzUgMTE5LTI1IDIxM2gxNjBjMTEtOTkgNC0xNjctMjgtMjE1WiIgZmlsbD0iI2RiYzVhYyIvPgogICAgPGVsbGlwc2UgY3g9IjM5NCIgY3k9IjIyOSIgcng9IjYyIiByeT0iNzIiIGZpbGw9IiNkOGFhODQiLz4KICAgIDxwYXRoIGQ9Ik0zMzAgMjI0Yy0zLTUxIDMyLTgzIDc3LTc1IDM2IDYgNTggMzQgNTEgNzYtMjUtMTQtNDktMzAtNjktNDQtMTUgMjMtMzQgMzQtNTkgNDNaIiBmaWxsPSIjM2QzMTJiIi8+CiAgICA8cGF0aCBkPSJNMzMzIDIxNmMtMTEgMTctMTAgNDAgMSA1MiA5LTUgMTMtMTQgMTMtMjVaIiBmaWxsPSIjYzQ5MjcwIi8+CiAgICA8ZWxsaXBzZSBjeD0iMzczIiBjeT0iMjI4IiByeD0iNCIgcnk9IjUiIGZpbGw9IiMzZDJlMjkiLz4KICAgIDxlbGxpcHNlIGN4PSI0MTQiIGN5PSIyMjYiIHJ4PSI0IiByeT0iNSIgZmlsbD0iIzNkMmUyOSIvPgogICAgPHBhdGggZD0iTTM3OCAyNTNjNyA0IDE1IDQgMjEtMSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjOWY2NzU0IiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogICAgPHBhdGggZD0iTTM0OSAyNTZjNiAyNSAyMiAzNyAzOCAyMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYmI4NTY0IiBzdHJva2Utd2lkdGg9IjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogICAgPHBhdGggZD0iTTM0NSAzMjhoOThsMjcgMTQ5SDMxOVoiIGZpbGw9IiM4NDZjNjAiLz4KICAgIDxwYXRoIGQ9Ik0zODEgMzI0djE0N000MDYgMzI0djE0NyIgc3Ryb2tlPSIjYjc5ZDhkIiBzdHJva2Utd2lkdGg9IjQiLz4KICA8L2c+CiAgPGc+CiAgICA8cGF0aCBkPSJNNTY4IDMzOGMtMjkgMzgtMjUgODQtOSAxMzJoMTIyYzEyLTU5IDMtMTA5LTI1LTEzNloiIGZpbGw9IiNkZmMzYTUiLz4KICAgIDxwYXRoIGQ9Ik01NTkgMzAyYy01LTU0IDMzLTkxIDgyLTg0IDQxIDYgNjcgNDAgNTcgODktMjgtMTMtNTItMjgtNzItNDYtMTYgMjQtMzcgMzctNjcgNDFaIiBmaWxsPSIjNGMzYjMzIi8+CiAgICA8ZWxsaXBzZSBjeD0iNjI4IiBjeT0iMzAxIiByeD0iNjMiIHJ5PSI3MSIgZmlsbD0iI2Q0YTI3YyIvPgogICAgPGVsbGlwc2UgY3g9IjYwOSIgY3k9IjMwMyIgcng9IjQiIHJ5PSI1IiBmaWxsPSIjM2IyZDI3Ii8+CiAgICA8ZWxsaXBzZSBjeD0iNjQ5IiBjeT0iMzAwIiByeD0iNCIgcnk9IjUiIGZpbGw9IiMzYjJkMjciLz4KICAgIDxwYXRoIGQ9Ik02MTggMzI2YzcgNCAxNCA0IDIwLTEiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzk1NjA0NyIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICAgIDxwYXRoIGQ9Ik01NzIgMzk4aDEwOWwxNyA3Mkg1NTFaIiBmaWxsPSIjNmE3MDY5Ii8+CiAgICA8cGF0aCBkPSJNNTk2IDM4OGM4IDkgNTAgOSA1OCAwIiBmaWxsPSJub25lIiBzdHJva2U9IiM0ZTQwMzgiIHN0cm9rZS13aWR0aD0iNCIvPgogIDwvZz4KICA8Zz4KICAgIDxlbGxpcHNlIGN4PSI0ODciIGN5PSI1MDUiIHJ4PSI4NSIgcnk9IjE5IiBmaWxsPSIjNGIzMjIyIiBvcGFjaXR5PSIuMiIvPgogICAgPHBhdGggZD0iTTM2NyA0NjFoNTRsLTkgNDJjLTggMTYtMzEgMTYtMzggMFoiIGZpbGw9IiNmN2VmZGYiLz4KICAgIDxwYXRoIGQ9Ik00MTQgNDcwYzI5LTQgMzMgMjYgMSAyNiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZjdlZmRmIiBzdHJva2Utd2lkdGg9IjgiLz4KICAgIDxwYXRoIGQ9Ik0zOTMgNDU4Yy01LTE1IDExLTE5IDYtMzVNNDEyIDQ1NmMtNS0xNSAxMS0yMCA2LTM1IiBmaWxsPSJub25lIiBzdHJva2U9IiNjNGIwOTIiIHN0cm9rZS13aWR0aD0iMyIvPgogICAgPHBhdGggZD0iTTU3MSA0NjZoNTFsLTggMzhjLTcgMTQtMjggMTQtMzUgMFoiIGZpbGw9IiNmN2VmZGYiLz4KICAgIDxwYXRoIGQ9Ik02MTUgNDc0YzI1LTMgMjkgMjQgMSAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZjdlZmRmIiBzdHJva2Utd2lkdGg9IjgiLz4KICAgIDxwYXRoIGQ9Ik01ODcgNDYyYy01LTE0IDEwLTE4IDYtMzNNNjA0IDQ2MGMtNS0xNCAxMC0xOCA2LTMzIiBmaWxsPSJub25lIiBzdHJva2U9IiNjNGIwOTIiIHN0cm9rZS13aWR0aD0iMyIvPgogIDwvZz4KICA8cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjY5MCIgZmlsdGVyPSJ1cmwoI2dyYWluKSIgb3BhY2l0eT0iLjI1Ii8+Cjwvc3ZnPgo=",
+        "王奶奶听到小陈愿意随时接电话，脸上露出安心的神情。",
+        { wide: true, caption: "第十二次服务" },
+      )}
+      ${dialogue("小陈", ["当然了，您直接打给我就行。"])}
+      ${dialogue("王奶奶", ["那就好。", "我现在觉得你就跟自己孩子一样。"])}
       ${trustPanel({ elder: 5, elderTransition: { from: 3, to: 5 } })}
       <div class="notice">你已经获得王奶奶的高度信任。信任继续加深，也会让下一步变得复杂。</div>
       <div class="action-row">${primaryButton("trust-next-day12", "继续")}</div>
+    `,
+  );
+}
+
+function renderBoundaryDirect() {
+  return pageShell(
+    "",
+    `
+      <div>
+        <p class="scene-kicker">场景 03 · 关系需要边界</p>
+        <h2 class="scene-title" tabindex="-1">关系需要边界</h2>
+      </div>
+      ${art("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MDAgNjkwIiByb2xlPSJpbWciIGFyaWEtbGFiZWxsZWRieT0idGl0bGUgZGVzYyI+CiAgPHRpdGxlIGlkPSJ0aXRsZSI+6YCQ5riQ5bu656uL5L+h5Lu7PC90aXRsZT4KICA8ZGVzYyBpZD0iZGVzYyI+5bCP6ZmI5ZKM546L5aW25aW25Z2Q5Zyo5pqW6Imy5a6i5Y6F6YeM6IGK5aSp77yM5qGM5LiK5pS+552A5Lik5p2v54Ot6Iy244CCPC9kZXNjPgogIDxkZWZzPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJ3YWxsIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2VhZDliZiIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNiZDlhNzQiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9IndpbmRvdyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNmZmY1ZGEiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjOWNhZTllIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJ3b29kIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzhlNWUzZSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM0ZTM1MjciLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8cmFkaWFsR3JhZGllbnQgaWQ9Imdsb3ciPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNmZmY3ZGMiIHN0b3Atb3BhY2l0eT0iLjgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjZjVjNDc3IiBzdG9wLW9wYWNpdHk9IjAiLz4KICAgIDwvcmFkaWFsR3JhZGllbnQ+CiAgICA8ZmlsdGVyIGlkPSJncmFpbiI+CiAgICAgIDxmZVR1cmJ1bGVuY2UgYmFzZUZyZXF1ZW5jeT0iLjg2IiBudW1PY3RhdmVzPSIzIiBzZWVkPSIxNyIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+CiAgICAgIDxmZUNvbG9yTWF0cml4IHZhbHVlcz0iMSAwIDAgMCAwIDAgMSAwIDAgMCAwIDAgMSAwIDAgMCAwIDAgLjEzIDAiLz4KICAgIDwvZmlsdGVyPgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjY5MCIgZmlsbD0idXJsKCN3YWxsKSIvPgogIDxlbGxpcHNlIGN4PSI1OTUiIGN5PSIxODYiIHJ4PSIzNDAiIHJ5PSIzMTAiIGZpbGw9InVybCgjZ2xvdykiLz4KICA8ZyBvcGFjaXR5PSIuODMiPgogICAgPHJlY3QgeD0iNTAxIiB5PSI2MCIgd2lkdGg9IjIyOSIgaGVpZ2h0PSIyNTAiIHJ4PSI1IiBmaWxsPSIjNzg1YTQzIi8+CiAgICA8cmVjdCB4PSI1MTUiIHk9Ijc0IiB3aWR0aD0iMjAxIiBoZWlnaHQ9IjIyMiIgZmlsbD0idXJsKCN3aW5kb3cpIi8+CiAgICA8cGF0aCBkPSJNNTI1IDI1NGM1My02NiAxMTItNzQgMTc4LTE0MHYxODJINTI1WiIgZmlsbD0iIzZmOGU3OSIgb3BhY2l0eT0iLjU1Ii8+CiAgICA8cGF0aCBkPSJNNjE1IDc0djIyMk01MTUgMTg4aDIwMSIgc3Ryb2tlPSIjZmZmOWVjIiBzdHJva2Utd2lkdGg9IjgiLz4KICAgIDxwYXRoIGQ9Ik00OTEgNTNjLTEwIDY1LTEzIDE1NC02IDI0NSAyOS0xMSAzMC0yMiAzMC01NCAxLTY3LTUtMTQ2LTExLTE5MVoiIGZpbGw9IiM2ZjUxM2UiIG9wYWNpdHk9Ii42Ii8+CiAgICA8cGF0aCBkPSJNNzQyIDUwYzE2IDY1IDIwIDE2MCA4IDI1NS0yOC0xMy0zMS0yNi0zMS02MSAwLTc0IDUtMTQ5IDEzLTE5NFoiIGZpbGw9IiM2YjRmM2MiIG9wYWNpdHk9Ii42NSIvPgogIDwvZz4KICA8cGF0aCBkPSJNMCA1MzVjMTM0LTM5IDIyNS0yMSAzMzEtMjggMTQyLTkgMjc2IDggNDY5IDE4djE2NUgwWiIgZmlsbD0iIzlhNzU1MyIgb3BhY2l0eT0iLjI1Ii8+CiAgPGc+CiAgICA8ZWxsaXBzZSBjeD0iMzkxIiBjeT0iNjI2IiByeD0iMzI1IiByeT0iMzgiIGZpbGw9IiM0YzM0MjQiIG9wYWNpdHk9Ii4yMiIvPgogICAgPHBhdGggZD0iTTQ2IDQ4NGg2OTBjMjAgMCAzNCAxNCAzNCAzNXYyMWMwIDIxLTE2IDM3LTM3IDM3SDQyYy0xOCAwLTMyLTE0LTMyLTMydi0yNWMwLTIwIDE0LTM2IDM2LTM2WiIgZmlsbD0idXJsKCN3b29kKSIvPgogICAgPHBhdGggZD0iTTU1IDU2Mmg2NzFsMjcgOTBoLTQ3bC0yNS01MkgxMDJsLTI1IDUySDI2WiIgZmlsbD0iIzVjM2IyOCIvPgogICAgPHBhdGggZD0iTTE1MSA1NjcgMTE2IDY3NE02MzcgNTY3bDM1IDEwNyIgc3Ryb2tlPSIjNDIyYjFkIiBzdHJva2Utd2lkdGg9IjIwIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8L2c+CiAgPGc+CiAgICA8cGF0aCBkPSJNNjcgNDAyYzIxLTc5IDc4LTExMiAxNTItODQgNDItNDUgMTA0LTI1IDExMiAzMyA1MiAyMSA2MCA3OCAzMiAxNDNsLTMxMSAxYy03LTQwLTQtNjkgMTUtOTNaIiBmaWxsPSIjOGI4MTcxIi8+CiAgICA8cGF0aCBkPSJNODkgMzk5YzMxLTUwIDc3LTYyIDEyNi0zMCAzMC0yOCA3NS0xNyA4NCAyOSA0NCAyMCA0NCA1NSAyMyA5NUg5MWMtMTUtMzEtMTUtNjItMi05NFoiIGZpbGw9IiNiMmEzOGMiLz4KICAgIDxwYXRoIGQ9Ik0yOTggMzY4YzEyLTY2IDY3LTExMiAxMzctMTAyIDIyLTYwIDkzLTYxIDEyMC01IDY0IDcgOTEgNTcgNzcgMTI4LTExIDU1LTU0IDc1LTExNCA3MUgzNjljLTYwLTktODQtMzUtNzEtOTJaIiBmaWxsPSIjNzY1NzQ3Ii8+CiAgICA8cGF0aCBkPSJNMzM4IDM3N2MxNS00OSA1My03OCAxMDQtNzQgMjUtNDQgODMtMzkgMTAyIDQgNTAgMTUgNTggNTkgNDUgMTA0LTEwIDM1LTQ1IDQ3LTk1IDQySDM3M2MtNDAtNy00OC0zMi0zNS03NloiIGZpbGw9IiM5OTcxNTkiLz4KICA8L2c+CiAgPGc+CiAgICA8cGF0aCBkPSJNMzI3IDI4NWMtMzEgMzYtMzUgMTE5LTI1IDIxM2gxNjBjMTEtOTkgNC0xNjctMjgtMjE1WiIgZmlsbD0iI2RiYzVhYyIvPgogICAgPGVsbGlwc2UgY3g9IjM5NCIgY3k9IjIyOSIgcng9IjYyIiByeT0iNzIiIGZpbGw9IiNkOGFhODQiLz4KICAgIDxwYXRoIGQ9Ik0zMzAgMjI0Yy0zLTUxIDMyLTgzIDc3LTc1IDM2IDYgNTggMzQgNTEgNzYtMjUtMTQtNDktMzAtNjktNDQtMTUgMjMtMzQgMzQtNTkgNDNaIiBmaWxsPSIjM2QzMTJiIi8+CiAgICA8cGF0aCBkPSJNMzMzIDIxNmMtMTEgMTctMTAgNDAgMSA1MiA5LTUgMTMtMTQgMTMtMjVaIiBmaWxsPSIjYzQ5MjcwIi8+CiAgICA8ZWxsaXBzZSBjeD0iMzczIiBjeT0iMjI4IiByeD0iNCIgcnk9IjUiIGZpbGw9IiMzZDJlMjkiLz4KICAgIDxlbGxpcHNlIGN4PSI0MTQiIGN5PSIyMjYiIHJ4PSI0IiByeT0iNSIgZmlsbD0iIzNkMmUyOSIvPgogICAgPHBhdGggZD0iTTM3OCAyNTNjNyA0IDE1IDQgMjEtMSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjOWY2NzU0IiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogICAgPHBhdGggZD0iTTM0OSAyNTZjNiAyNSAyMiAzNyAzOCAyMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYmI4NTY0IiBzdHJva2Utd2lkdGg9IjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogICAgPHBhdGggZD0iTTM0NSAzMjhoOThsMjcgMTQ5SDMxOVoiIGZpbGw9IiM4NDZjNjAiLz4KICAgIDxwYXRoIGQ9Ik0zODEgMzI0djE0N000MDYgMzI0djE0NyIgc3Ryb2tlPSIjYjc5ZDhkIiBzdHJva2Utd2lkdGg9IjQiLz4KICA8L2c+CiAgPGc+CiAgICA8cGF0aCBkPSJNNTY4IDMzOGMtMjkgMzgtMjUgODQtOSAxMzJoMTIyYzEyLTU5IDMtMTA5LTI1LTEzNloiIGZpbGw9IiNkZmMzYTUiLz4KICAgIDxwYXRoIGQ9Ik01NTkgMzAyYy01LTU0IDMzLTkxIDgyLTg0IDQxIDYgNjcgNDAgNTcgODktMjgtMTMtNTItMjgtNzItNDYtMTYgMjQtMzcgMzctNjcgNDFaIiBmaWxsPSIjNGMzYjMzIi8+CiAgICA8ZWxsaXBzZSBjeD0iNjI4IiBjeT0iMzAxIiByeD0iNjMiIHJ5PSI3MSIgZmlsbD0iI2Q0YTI3YyIvPgogICAgPGVsbGlwc2UgY3g9IjYwOSIgY3k9IjMwMyIgcng9IjQiIHJ5PSI1IiBmaWxsPSIjM2IyZDI3Ii8+CiAgICA8ZWxsaXBzZSBjeD0iNjQ5IiBjeT0iMzAwIiByeD0iNCIgcnk9IjUiIGZpbGw9IiMzYjJkMjciLz4KICAgIDxwYXRoIGQ9Ik02MTggMzI2YzcgNCAxNCA0IDIwLTEiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzk1NjA0NyIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICAgIDxwYXRoIGQ9Ik01NzIgMzk4aDEwOWwxNyA3Mkg1NTFaIiBmaWxsPSIjNmE3MDY5Ii8+CiAgICA8cGF0aCBkPSJNNTk2IDM4OGM4IDkgNTAgOSA1OCAwIiBmaWxsPSJub25lIiBzdHJva2U9IiM0ZTQwMzgiIHN0cm9rZS13aWR0aD0iNCIvPgogIDwvZz4KICA8Zz4KICAgIDxlbGxpcHNlIGN4PSI0ODciIGN5PSI1MDUiIHJ4PSI4NSIgcnk9IjE5IiBmaWxsPSIjNGIzMjIyIiBvcGFjaXR5PSIuMiIvPgogICAgPHBhdGggZD0iTTM2NyA0NjFoNTRsLTkgNDJjLTggMTYtMzEgMTYtMzggMFoiIGZpbGw9IiNmN2VmZGYiLz4KICAgIDxwYXRoIGQ9Ik00MTQgNDcwYzI5LTQgMzMgMjYgMSAyNiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZjdlZmRmIiBzdHJva2Utd2lkdGg9IjgiLz4KICAgIDxwYXRoIGQ9Ik0zOTMgNDU4Yy01LTE1IDExLTE5IDYtMzVNNDEyIDQ1NmMtNS0xNSAxMS0yMCA2LTM1IiBmaWxsPSJub25lIiBzdHJva2U9IiNjNGIwOTIiIHN0cm9rZS13aWR0aD0iMyIvPgogICAgPHBhdGggZD0iTTU3MSA0NjZoNTFsLTggMzhjLTcgMTQtMjggMTQtMzUgMFoiIGZpbGw9IiNmN2VmZGYiLz4KICAgIDxwYXRoIGQ9Ik02MTUgNDc0YzI1LTMgMjkgMjQgMSAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZjdlZmRmIiBzdHJva2Utd2lkdGg9IjgiLz4KICAgIDxwYXRoIGQ9Ik01ODcgNDYyYy01LTE0IDEwLTE4IDYtMzNNNjA0IDQ2MGMtNS0xNCAxMC0xOCA2LTMzIiBmaWxsPSJub25lIiBzdHJva2U9IiNjNGIwOTIiIHN0cm9rZS13aWR0aD0iMyIvPgogIDwvZz4KICA8cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjY5MCIgZmlsdGVyPSJ1cmwoI2dyYWluKSIgb3BhY2l0eT0iLjI1Ii8+Cjwvc3ZnPgo=",
+        "王奶奶理解了小陈的忙碌，王女士也明确了服务时间之外的照应方式。",
+        { wide: true, caption: "服务时间之外" },
+      )}
+      ${dialogue("王奶奶", ["哦，我理解。你们年轻人都是很忙的。"])}
+      ${dialogue("王女士", ["您服务时间之外的事交给我们就行。"])}
+      ${trustPanel({ elder: 3, family: 4 })}
+      ${statusStrip("✓ 服务继续", "success")}
+      ${newsCard({
+        title: "关系需要边界",
+        body:
+          "当服务涉及老人的私人生活时，老人、家属和服务人员之间需要更多沟通。但现实中，哪些事情属于正常服务，哪些事情需要家属同意，并不总是十分明确。",
+      })}
+      <div class="action-row">${primaryButton("boundary-next", "继续")}</div>
     `,
   );
 }
@@ -1636,7 +1776,14 @@ function renderGiftConsulted() {
 
 function renderReplacement(variant) {
   const familyVisible = variant !== "Accepted";
-  const familyValue = variant === "Rejected" || variant === "Consulted" ? 4 : null;
+  const familyValue =
+    variant === "Rejected" || variant === "Consulted" || variant === "Boundary" ? 4 : null;
+  const previousElderTrust = {
+    Accepted: 5,
+    Rejected: 3,
+    Consulted: 4,
+    Boundary: 3,
+  }[variant];
 
   return pageShell(
     "",
@@ -1667,7 +1814,7 @@ function renderReplacement(variant) {
       ${trustPanel({
         elder: 1,
         family: familyVisible ? familyValue : null,
-        elderTransition: { from: 5, to: 1 },
+        elderTransition: { from: previousElderTrust, to: 1 },
       })}
       ${statusStrip("服务人员已更换", "neutral")}
       ${newsCard({
@@ -1685,6 +1832,7 @@ function renderEnding(variant) {
     Accepted: "你接受了私人馈赠，服务关系因家属投诉而终止。",
     Rejected: "你拒绝了私人馈赠，守住了边界，也让王奶奶感到了一点距离。",
     Consulted: "你主动询问了家属，沟通让服务关系继续下去。",
+    Boundary: "你请王奶奶有事联系女儿，王女士明确了服务时间之外的边界。",
   }[variant];
 
   return pageShell(
@@ -1767,11 +1915,32 @@ function renderScene() {
     case "trustDay3":
       content = renderTrustDay3();
       break;
+    case "trustDay3Duck":
+      content = renderTrustDay3Response("duck");
+      break;
+    case "trustDay3Dish":
+      content = renderTrustDay3Response("dish");
+      break;
+    case "trustDay3Travel":
+      content = renderTrustDay3Response("travel");
+      break;
     case "trustDay7":
       content = renderTrustDay7();
       break;
+    case "trustDay7Gaming":
+      content = renderTrustDay7Response("gaming");
+      break;
+    case "trustDay7Cats":
+      content = renderTrustDay7Response("cats");
+      break;
+    case "trustDay7Tea":
+      content = renderTrustDay7Response("tea");
+      break;
     case "trustDay12":
       content = renderTrustDay12();
+      break;
+    case "trustDay12Accepted":
+      content = renderTrustDay12Accepted();
       break;
     case "gift":
       content = renderGift();
@@ -1785,6 +1954,9 @@ function renderScene() {
     case "giftConsulted":
       content = renderGiftConsulted();
       break;
+    case "boundaryDirect":
+      content = renderBoundaryDirect();
+      break;
     case "replacementAccepted":
       content = renderReplacement("Accepted");
       break;
@@ -1794,6 +1966,9 @@ function renderScene() {
     case "replacementConsulted":
       content = renderReplacement("Consulted");
       break;
+    case "replacementBoundary":
+      content = renderReplacement("Boundary");
+      break;
     case "endingAccepted":
       content = renderEnding("Accepted");
       break;
@@ -1802,6 +1977,9 @@ function renderScene() {
       break;
     case "endingConsulted":
       content = renderEnding("Consulted");
+      break;
+    case "endingBoundary":
+      content = renderEnding("Boundary");
       break;
     default:
       content = renderOpening();
@@ -1861,6 +2039,35 @@ function handleFirstVisitChoice(choice) {
   setScene(choice === "platform" ? "visitFailedPlatform" : "visitFailedCare");
 }
 
+function handleFoodChoice(choice) {
+  const responseScenes = {
+    duck: "trustDay3Duck",
+    dish: "trustDay3Dish",
+    travel: "trustDay3Travel",
+  };
+  setScene(responseScenes[choice]);
+}
+
+function handlePreferenceChoice(choice) {
+  const responseScenes = {
+    gaming: "trustDay7Gaming",
+    cats: "trustDay7Cats",
+    tea: "trustDay7Tea",
+  };
+  setScene(responseScenes[choice]);
+}
+
+function handleContactChoice(choice) {
+  if (choice === "call") {
+    gameState.elderTrust = 5;
+    setScene("trustDay12Accepted");
+    return;
+  }
+
+  gameState.familyTrust = 4;
+  setScene("boundaryDirect");
+}
+
 function handleGiftChoice(choice) {
   if (choice === "accept") {
     gameState.elderTrust = 5;
@@ -1887,6 +2094,11 @@ function handleGiftChoice(choice) {
   setScene("giftConsulted");
 }
 
+function handleBoundaryNext() {
+  gameState.elderTrust = 1;
+  setScene("replacementBoundary");
+}
+
 function handleGiftNext() {
   const currentScene = gameState.scene;
   gameState.elderTrust = 1;
@@ -1906,6 +2118,8 @@ function handleReplacementNext() {
     setScene("endingAccepted");
   } else if (replacementScene === "replacementRejected") {
     setScene("endingRejected");
+  } else if (replacementScene === "replacementBoundary") {
+    setScene("endingBoundary");
   } else {
     setScene("endingConsulted");
   }
@@ -1954,6 +2168,15 @@ root.addEventListener("click", (event) => {
     case "first-visit-choice":
       handleFirstVisitChoice(choice);
       break;
+    case "food-choice":
+      handleFoodChoice(choice);
+      break;
+    case "preference-choice":
+      handlePreferenceChoice(choice);
+      break;
+    case "contact-choice":
+      handleContactChoice(choice);
+      break;
     case "retry-first-visit":
       gameState.elderTrust = 0;
       gameState.serviceActive = true;
@@ -1963,7 +2186,6 @@ root.addEventListener("click", (event) => {
       setScene("trustDay7");
       break;
     case "trust-next-day7":
-      gameState.elderTrust = 5;
       setScene("trustDay12");
       break;
     case "trust-next-day12":
@@ -1974,6 +2196,9 @@ root.addEventListener("click", (event) => {
       break;
     case "gift-next":
       handleGiftNext();
+      break;
+    case "boundary-next":
+      handleBoundaryNext();
       break;
     case "replacement-next":
       handleReplacementNext();
